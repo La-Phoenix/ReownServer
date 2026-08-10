@@ -1,0 +1,254 @@
+// Prisma Schema for Reown Backend
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  BUY
+  SELL
+  BOTH
+}
+
+enum SellerType {
+  CASUAL
+  PRO
+}
+
+enum VerificationTier {
+  BASIC
+  VERIFIED
+  PRO
+}
+
+enum ListingType {
+  MARKETPLACE
+  AUCTION
+  GIVEAWAY
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  EXPIRED
+  FLAGGED
+}
+
+enum ListingVisibility {
+  PUBLIC
+  PRIVATE_LINK
+}
+
+enum OrderStatus {
+  PENDING
+  ESCROWED
+  RELEASED
+  DISPUTED
+  REFUNDED
+}
+
+enum GiveawayClaimMode {
+  FCFS
+  GIVER_CHOOSES
+}
+
+enum GiveawayStatus {
+  ACTIVE
+  CLAIMED
+  EXPIRED
+}
+
+model User {
+  id                String           @id @default(uuid())
+  email             String           @unique
+  passwordHash      String           @map("password_hash")
+  firstName         String           @map("first_name")
+  lastName          String           @map("last_name")
+  phone             String?
+  dateOfBirth       DateTime?        @map("date_of_birth")
+  country           String?
+  state             String?
+  locationLatLng    String?          @map("location_lat_lng")
+  role              UserRole         @default(BOTH)
+  sellerType        SellerType       @default(CASUAL) @map("seller_type")
+  verificationTier  VerificationTier @default(BASIC) @map("verification_tier")
+  ninVerified       Boolean          @default(false) @map("nin_verified")
+  bvnVerified       Boolean          @default(false) @map("bvn_verified")
+  bankAccountNumber String?          @map("bank_account_number")
+  bankName          String?          @map("bank_name")
+  bankAccountName   String?          @map("bank_account_name")
+  strikeCount       Int              @default(0) @map("strike_count")
+  suspendedUntil    DateTime?        @map("suspended_until")
+  ratingAvg         Float            @default(0.0) @map("rating_avg")
+  totalSales        Int              @default(0) @map("total_sales")
+  followerCount     Int              @default(0) @map("follower_count")
+  followingCount    Int              @default(0) @map("following_count")
+  termsAcceptedAt   DateTime?        @map("terms_accepted_at")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  listings         Listing[]
+  buyerOrders      Order[]      @relation("BuyerOrders")
+  sellerOrders     Order[]      @relation("SellerOrders")
+  bids             Bid[]
+  auctionWins      Auction[]    @relation("AuctionWinner")
+  giveawayWins     Giveaway[]   @relation("GiveawayWinner")
+  sentMessages     Message[]    @relation("SentMessages")
+  receivedMessages Message[]    @relation("ReceivedMessages")
+  watchAlerts      WatchAlert[]
+  followers        Follow[]     @relation("Following")
+  following        Follow[]     @relation("Follower")
+
+  @@map("users")
+}
+
+model Listing {
+  id                  String            @id @default(uuid())
+  sellerId            String            @map("seller_id")
+  seller              User              @relation(fields: [sellerId], references: [id])
+  type                ListingType       @default(MARKETPLACE)
+  title               String
+  category            String
+  condition           String
+  price               BigInt            // kobo
+  status              ListingStatus     @default(DRAFT)
+  visibility          ListingVisibility @default(PUBLIC)
+  shareToken          String?           @unique @map("share_token")
+  locationArea        String            @map("location_area")
+  locationFullAddress String?           @map("location_full_address")
+  mediaUrls           Json              @map("media_urls")
+  inspectionAvailable Boolean           @default(false) @map("inspection_available")
+  expiresAt           DateTime?         @map("expires_at")
+  boostUntil          DateTime?         @map("boost_until")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  orders   Order[]
+  auction  Auction?
+  giveaway Giveaway?
+
+  @@map("listings")
+}
+
+model Order {
+  id               String      @id @default(uuid())
+  listingId        String      @map("listing_id")
+  listing          Listing     @relation(fields: [listingId], references: [id])
+  buyerId          String      @map("buyer_id")
+  buyer            User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId         String      @map("seller_id")
+  seller           User        @relation("SellerOrders", fields: [sellerId], references: [id])
+  itemAmount       BigInt      @map("item_amount") // kobo
+  buyerFee         BigInt      @map("buyer_fee")   // kobo
+  totalCharged     BigInt      @map("total_charged") // kobo
+  status           OrderStatus @default(PENDING)
+  paystackRef      String?     @map("paystack_ref")
+  escrowSubAccount String?     @map("escrow_sub_account")
+  handoffCode      String?     @map("handoff_code")
+  autoReleaseAt    DateTime?   @map("auto_release_at")
+  buyerConfirmedAt DateTime?   @map("buyer_confirmed_at")
+  releasedAt       DateTime?   @map("released_at")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  messages Message[]
+
+  @@map("orders")
+}
+
+model Auction {
+  id               String   @id @default(uuid())
+  listingId        String   @unique @map("listing_id")
+  listing          Listing  @relation(fields: [listingId], references: [id])
+  startPrice       BigInt   @map("start_price") // kobo
+  reservePrice     BigInt?  @map("reserve_price") // kobo
+  buyItNowPrice    BigInt?  @map("buy_it_now_price") // kobo
+  currentBid       BigInt   @default(0) @map("current_bid") // kobo
+  currentWinnerId  String?  @map("current_winner_id")
+  currentWinner    User?    @relation("AuctionWinner", fields: [currentWinnerId], references: [id])
+  endsAt           DateTime @map("ends_at")
+  softCloseMinutes Int      @default(10) @map("soft_close_minutes")
+  bidCount         Int      @default(0) @map("bid_count")
+  status           String   @default("ACTIVE")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  bids Bid[]
+
+  @@map("auctions")
+}
+
+model Bid {
+  id             String   @id @default(uuid())
+  auctionId      String   @map("auction_id")
+  auction        Auction  @relation(fields: [auctionId], references: [id])
+  bidderId       String   @map("bidder_id")
+  bidder         User     @relation(fields: [bidderId], references: [id])
+  amount         BigInt   // kobo
+  maxProxyAmount BigInt?  @map("max_proxy_amount") // kobo
+  isProxyBid     Boolean  @default(false) @map("is_proxy_bid")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("bids")
+}
+
+model Giveaway {
+  id                  String            @id @default(uuid())
+  listingId           String            @unique @map("listing_id")
+  listing             Listing           @relation(fields: [listingId], references: [id])
+  claimMode           GiveawayClaimMode @default(FCFS) @map("claim_mode")
+  pickupDeadlineHours Int               @default(48) @map("pickup_deadline_hours")
+  winnerId            String?           @map("winner_id")
+  winner              User?             @relation("GiveawayWinner", fields: [winnerId], references: [id])
+  status              GiveawayStatus    @default(ACTIVE)
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  @@map("giveaways")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  orderId    String?  @map("order_id")
+  order      Order?   @relation(fields: [orderId], references: [id])
+  senderId   String   @map("sender_id")
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String   @map("receiver_id")
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content    String
+  isFlagged  Boolean  @default(false) @map("is_flagged")
+  flagReason String?  @map("flag_reason")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("messages")
+}
+
+model WatchAlert {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  user             User     @relation(fields: [userId], references: [id])
+  searchParameters Json     @map("search_parameters")
+  durationDays     Int      @default(7) @map("duration_days")
+  expiresAt        DateTime @map("expires_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("watch_alerts")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String   @map("follower_id")
+  follower    User     @relation("Follower", fields: [followerId], references: [id])
+  followingId String   @map("following_id")
+  following   User     @relation("Following", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
