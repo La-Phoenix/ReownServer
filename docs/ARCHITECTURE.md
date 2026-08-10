@@ -13,7 +13,7 @@ The project follows **Clean / Hexagonal Architecture (Ports and Adapters)** inte
 Each domain feature module (e.g., `auth`, `users`, `listings`, `orders`, `auctions`, `feed`) is structured into four distinct layers:
 
 ```text
-src/<module_name>/
+api/src/<module_name>/
 ├── domain/                      # Pure Domain Logic & Core Business Rules
 │   ├── entities/                # Domain Entities (No Framework Dependencies)
 │   └── value-objects/           # Value Objects (e.g., HandoffCode, KoboAmount)
@@ -71,6 +71,15 @@ src/<module_name>/
 
 ### Rule 3: Monetary Values Stored Strictly in Kobo
 * All monetary values (prices, fees, bids, total charged) **MUST** be handled and stored as `bigint` / `BigInt` representing **kobo** (e.g., ₦1,000 = 100,000 kobo). Floating-point currency calculations are strictly banned to prevent rounding errors.
+
+### Rule 4: Always Use `prisma migrate dev` (Never `prisma db push`)
+* All database changes must be recorded as tracked migration SQL files using `npx prisma migrate dev --name <migration_name>`. **`npx prisma db push` is strictly banned** to prevent untracked schema mutations.
+
+### Rule 5: Mandatory TypeScript Type Checks
+* Always verify that all TypeScript code passes strict type checking (`npx tsc --noEmit`) with zero compilation or import type errors after making edits.
+
+### Rule 6: Avoid Magic Strings & Raw Hardcoded Constants
+* Never hardcode magic strings (e.g., `'VERIFIED'`, `'BOTH'`, `'CASUAL'`, token expiration strings `'7d'`, or raw error messages) inline. Always use Prisma generated Enums (`UserRole`, `SellerType`, `VerificationTier`), domain TypeScript enums, or centralized constants files under `api/src/common/constants`.
 
 ---
 

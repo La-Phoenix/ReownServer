@@ -41,64 +41,50 @@ api/src/<module_name>/
 
 ---
 
-## 📋 Strict Coding Standards
+## 📋 Strict Coding & Database Standards
 
 1. **NO `any` Types:** Use of `any` is strictly prohibited. All methods, variables, and parameters must be explicitly typed with TypeScript interfaces or Prisma types.
 2. **Mandatory Swagger Documentation:** All REST endpoints must be decorated with `@ApiTags`, `@ApiOperation`, and `@ApiResponse`.
 3. **Monetary Integrity:** All prices, fees, and transaction amounts are represented in **kobo** as integers (`bigint`), preventing floating-point arithmetic errors.
+4. **Database Migrations Policy:** Always use `npx prisma migrate dev --name <migration_name>` for database schema changes. **NEVER use `npx prisma db push`** in development or production.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start Commands
 
-### 1. Prerequisites
-- [Node.js v20+](https://nodejs.org)
-- [Docker](https://www.docker.com/) (for local PostgreSQL & Redis)
-
-### 2. Environment Setup
-Copy the environment template and set your credentials:
-
-```bash
-cp api/.env.example api/.env
-```
-
-### 3. Spin Up Local Services (PostgreSQL & Redis)
-Start the PostgreSQL database and Redis containers using Docker Compose:
+### 1. Start PostgreSQL & Redis Containers
+From the root project folder:
 
 ```bash
 docker-compose up -d
 ```
 
-### 4. Install Dependencies & Generate Prisma Client
-Navigate to the `api` directory and run:
-
+### 2. Environment Setup
 ```bash
 cd api
-npm install
-npx prisma generate
+cp .env.example .env
 ```
 
-### 5. Run Database Migrations
-Apply database schema migrations to PostgreSQL:
-
+### 3. Generate Prisma Client & Run Database Migrations
 ```bash
+npx prisma generate
 npx prisma migrate dev --name init
 ```
 
-### 6. Start the Development Server
-Launch the NestJS application in watch mode:
+> ⚠️ **Rule:** Do NOT use `npx prisma db push`. Always run `npx prisma migrate dev` to preserve migration tracking history.
 
+### 4. Start Development Server
 ```bash
 npm run start:dev
 ```
 
-The API will run on `http://localhost:3000`.
+The API server will run on `http://localhost:3000`.
 
 ---
 
 ## 📚 API Documentation (Swagger)
 
-Interactive Swagger UI documentation is automatically available when running the application:
+Interactive Swagger UI documentation is available when running the application:
 
 🔗 **Swagger OpenAPI Docs:** `http://localhost:3000/api/docs`
 

@@ -1,0 +1,7 @@
+export const AUTH_CONSTANTS = {
+  JWT_DEFAULT_SECRET: 'reown_jwt_secret_key_2026',
+  JWT_EXPIRES_IN: '7d',
+  PASSWORD_SALT_ROUNDS: 10,
+  OTP_EXPIRATION_MINUTES: 10,
+  OTP_EXPIRATION_MS: 10 * 60 * 1000,
+} as const;
