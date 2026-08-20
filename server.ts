@@ -25,7 +25,17 @@ async function bootstrap(): Promise<INestApplication> {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+
+    // CDN Options for Serverless Environments (Vercel) to ensure static CSS/JS load 100% reliably
+    const customOptions = {
+      customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css',
+      customJs: [
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.min.js',
+      ],
+    };
+
+    SwaggerModule.setup('api/docs', app, document, customOptions);
 
     await app.init();
   }
