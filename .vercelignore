@@ -1,0 +1,5 @@
+api/src
+api/test
+api/prisma
+api/node_modules
+api/dist
