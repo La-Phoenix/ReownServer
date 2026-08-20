@@ -1,19 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './api/src/app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express, { Request, Response } from 'express';
 
-const server = express();
-let isAppInitialized = false;
+let app: INestApplication;
 
-async function bootstrap() {
-  if (!isAppInitialized) {
-    const app = await NestFactory.create(
-      AppModule,
-      new ExpressAdapter(server),
-    );
+async function bootstrap(): Promise<INestApplication> {
+  if (!app) {
+    app = await NestFactory.create(AppModule);
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -34,11 +28,14 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
 
     await app.init();
-    isAppInitialized = true;
   }
+  return app;
 }
 
-export default async function handler(req: Request, res: Response): Promise<void> {
-  await bootstrap();
-  server(req, res);
+// Modern NestJS v11 Serverless Handler for Vercel
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function handler(req: any, res: any): Promise<void> {
+  const instance = await bootstrap();
+  const instanceServer = instance.getHttpAdapter().getInstance();
+  instanceServer(req, res);
 }
