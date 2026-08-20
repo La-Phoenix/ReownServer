@@ -4,7 +4,7 @@ import { RegisterDto } from '../../presentation/dtos/register.dto';
 import { RegisterResponseDto } from '../../presentation/dtos/register-response.dto';
 import { I_USER_REPOSITORY, type IUserRepository } from '../ports/user-repository.port';
 import { I_OTP_SERVICE, type IOtpService } from '../ports/otp-service.port';
-import { AUTH_CONSTANTS } from 'src/common/constants/auth.constants';
+import { AUTH_CONSTANTS } from '../../../common/constants/auth.constants';
 
 @Injectable()
 export class RegisterUserUseCase {
