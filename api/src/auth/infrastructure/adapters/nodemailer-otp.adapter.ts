@@ -36,17 +36,21 @@ export class NodemailerOtpAdapter implements IOtpService {
       this.logger.log(`[SMTP Mailtrap] Transporter active for ${host}:${port}`);
     }
 
-    // 3. Initialize Redis Client for Production OTP Storage & TTL Expiry
-    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    // 3. Initialize Redis Client (Supports Upstash TLS rediss:// and strips quotes)
+    const rawRedisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    const redisUrl = rawRedisUrl.trim().replace(/^["']|["']$/g, ''); // Strip outer quotes
+
     try {
+      const isTls = redisUrl.startsWith('rediss://');
       this.redisClient = new Redis(redisUrl, {
         maxRetriesPerRequest: 1,
         lazyConnect: false,
         enableOfflineQueue: false,
+        ...(isTls ? { tls: { rejectUnauthorized: false } } : {}),
       });
 
       this.redisClient.on('connect', () => {
-        this.logger.log(`[Redis OTP Storage] Successfully connected to Redis at ${redisUrl}`);
+        this.logger.log(`[Redis OTP Storage] Successfully connected to Redis`);
       });
 
       this.redisClient.on('error', (err) => {

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "postinstall": "npx prisma generate",
-    "build": "npx prisma generate && nest build",
+    "build": "npx prisma generate && npx prisma migrate deploy && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -57,7 +57,7 @@
     "@nestjs/testing": "^11.0.1",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
-    "@types/jest": "^30.0.0",
+    "@types/jest": "^29.5.12",
     "@types/node": "^24.0.0",
     "@types/nodemailer": "^6.4.17",
     "@types/passport-jwt": "^4.0.1",
