@@ -7,7 +7,10 @@
   },
   "scripts": {
     "postinstall": "npx prisma generate --schema=api/prisma/schema.prisma",
-    "build": "npx prisma generate --schema=api/prisma/schema.prisma"
+    "build": "npx prisma generate --schema=api/prisma/schema.prisma",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "npx prisma generate --schema=api/prisma/schema.prisma",
+    "prisma:migrate": "npx prisma migrate dev --schema=api/prisma/schema.prisma"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
