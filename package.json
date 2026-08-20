@@ -1,11 +1,12 @@
 {
   "name": "reown-server",
   "private": true,
-  "prisma": {
-    "schema": "api/prisma/schema.prisma"
+  "dependencies": {
+    "@prisma/client": "^6.3.0",
+    "prisma": "^6.3.0"
   },
   "scripts": {
-    "postinstall": "prisma generate --schema=api/prisma/schema.prisma",
-    "build": "prisma generate --schema=api/prisma/schema.prisma"
+    "postinstall": "npx prisma generate --schema=api/prisma/schema.prisma",
+    "build": "npx prisma generate --schema=api/prisma/schema.prisma"
   }
 }

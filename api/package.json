@@ -9,8 +9,8 @@
     "schema": "prisma/schema.prisma"
   },
   "scripts": {
-    "postinstall": "prisma generate --schema=prisma/schema.prisma",
-    "build": "prisma generate --schema=prisma/schema.prisma && nest build",
+    "postinstall": "npx prisma generate --schema=prisma/schema.prisma",
+    "build": "npx prisma generate --schema=prisma/schema.prisma && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
