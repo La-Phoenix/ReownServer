@@ -1,15 +1,1 @@
-{
-  "version": 2,
-  "outputDirectory": ".",
-  "functions": {
-    "index.ts": {
-      "includeFiles": "prisma/schema.prisma"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index"
-    }
-  ]
-}
+{}

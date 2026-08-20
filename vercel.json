@@ -1,15 +1,9 @@
 {
   "version": 2,
-  "outputDirectory": "api",
-  "functions": {
-    "api/index.ts": {
-      "includeFiles": "api/prisma/schema.prisma"
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/index"
+      "destination": "/server"
     }
   ]
 }
