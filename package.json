@@ -1,0 +1,11 @@
+{
+  "name": "reown-server",
+  "private": true,
+  "prisma": {
+    "schema": "api/prisma/schema.prisma"
+  },
+  "scripts": {
+    "postinstall": "prisma generate --schema=api/prisma/schema.prisma",
+    "build": "prisma generate --schema=api/prisma/schema.prisma"
+  }
+}
